@@ -18,6 +18,17 @@ var options = {
   token: null
 };
 
+var videoContainerSizes = {
+  "sm": {
+    height: 320,
+    width: 480
+  },
+  "lg": {
+    height: 480,
+    width: 720
+  }
+};
+
 // the demo can auto join channel with params in url
 $(() => {
   var urlParams = new URL(location.href).searchParams;
@@ -30,7 +41,9 @@ $(() => {
     $("#appid").val(options.appid);
     $("#token").val(options.token);
     $("#channel").val(options.channel);
-    $("#join-form").submit();
+
+    // Don't need for this demo
+    // $("#join-form").submit();
   }
 });
 $("#join-form").submit(async function (e) {
@@ -124,16 +137,21 @@ async function subscribe(user, mediaType) {
   const uid = user.uid;
   // subscribe to a remote user
   await client.subscribe(user, mediaType);
-  console.log("subscribe success");
+
   if (mediaType === 'video') {
     const player = $(`
       <div id="player-wrapper-${uid}">
-        <p class="player-name">remoteUser(${uid})</p>
-        <div id="player-${uid}" class="player"></div>
+        <div class="container-controls">
+          <p class="player-name">remoteUser(${uid})</p>
+          <button id="resize" type="button" class="btn btn-primary btn-sm">Resize video container (div element)</button>
+        </div> 
+        <div id="player-${uid}" data-size-variant="sm" class="player"></div>
       </div>
     `);
     $("#remote-playerlist").append(player);
     user.videoTrack.play(`player-${uid}`);
+
+    $("#resize").click(() => handleVideoContainerResize(uid))
   }
   if (mediaType === 'audio') {
     user.audioTrack.play();
@@ -154,4 +172,23 @@ function handleUserUnpublished(user, mediaType) {
     delete remoteUsers[id];
     $(`#player-wrapper-${id}`).remove();
   }
+}
+
+function handleVideoContainerResize(uid) {
+    const videoContainer = $(`#player-${uid}`);
+    const sizeVariant = videoContainer.attr('data-size-variant');
+
+    if (sizeVariant === "sm") {
+        const sizes = videoContainerSizes["lg"];
+
+        videoContainer.css('width', sizes.width);
+        videoContainer.css('height', sizes.height);
+        videoContainer.attr('data-size-variant', 'lg');
+    } else {
+        const sizes = videoContainerSizes["sm"];
+
+        videoContainer.css('width', sizes.width);
+        videoContainer.css('height', sizes.height);
+        videoContainer.attr('data-size-variant', 'sm');
+    }
 }

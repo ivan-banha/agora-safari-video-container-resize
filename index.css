@@ -36,6 +36,17 @@ input {
 .player {
   width: 480px;
   height: 320px;
+  padding: 8px;
+
+  border: 1px solid red;
+
+  video {
+    border: 2px solid blue;
+  }
+}
+
+.container-controls {
+  margin-bottom: 8px;
 }
 
 .player-name {
